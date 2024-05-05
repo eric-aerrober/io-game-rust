@@ -1,0 +1,11 @@
+[package]
+name = "iogame_client"
+version = "0.1.0"
+edition = "2021"
+
+# Dependencies
+[dependencies]
+iogame_common = { path = "../common" }
+tungstenite = "0.21.0"
+tokio = { version = "1", features = ["full"] }
+url = "2.2.2"

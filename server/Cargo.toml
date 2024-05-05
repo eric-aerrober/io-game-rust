@@ -1,0 +1,11 @@
+[package]
+name = "iogame_server"
+version = "0.1.0"
+edition = "2021"
+
+# Dependencies
+[dependencies]
+iogame_common = { path = "../common" }
+warp = "0.3"
+futures = "0.3"
+tokio = { version = "1", features = ["full"] }
