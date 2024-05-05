@@ -5,3 +5,7 @@ edition = "2021"
 
 [lib]
 path = "src/lib.rs"
+
+[dependencies]
+once_cell = "1.8"
+colored = "2.0" 
