@@ -1,30 +1,22 @@
-#![deny(warnings)]
+mod connections;
 
-use futures::StreamExt;
-use futures::FutureExt;
 use warp::Filter;
+use iogame_common::utils::logger::{Logger, clear_screen};
+use connections::connection_handshaker::handle_incomming_websocket_connection;
 
 #[tokio::main]
 async fn main() {
 
-    let routes = warp::path("echo")
-        // The `ws()` filter will prepare the Websocket handshake.
+    clear_screen("IO Game - Server");
+    let logger : Logger = Logger::new("server");
+
+    let routes = warp::path("websocket")
         .and(warp::ws())
         .map(|ws: warp::ws::Ws| {
-            // And then our closure will be called when it completes...
-            ws.on_upgrade(|websocket| {
-                // Just echo all messages back...
-                println!("Websocket connected");
-                let (tx, rx) = websocket.split();
-                rx.forward(tx).map(|result| {
-                    if let Err(e) = result {
-                        eprintln!("websocket error: {:?}", e);
-                    }
-                })
-            })
+            ws.on_upgrade(handle_incomming_websocket_connection)
         });
 
-    println!("Server started at http://[127, 0, 0, 1]:3030");
+    logger.debug("Server started on ws://localhost:3030/websocket");
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 
 }

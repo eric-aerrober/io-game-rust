@@ -22,12 +22,16 @@ pub fn clear_screen(message: &str) {
 
 impl Logger {
 
-    pub fn new(scope: &str, level: i32) -> Logger {
+    pub fn new_leveled(scope: &str, level: i32) -> Logger {
         Logger {
             scope: scope.to_string(),
             level: level,
             start_time: Instant::now(),
         }
+    }
+
+    pub fn new (scope: &str) -> Logger {
+        Logger::new_leveled(scope, 0)
     }
 
     fn elapsed_string(&self) -> String {
