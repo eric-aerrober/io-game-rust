@@ -1,6 +1,7 @@
 use tungstenite::{connect, Message};
 use url::Url;
 use iogame_common::utils::logger::{Logger, clear_screen};
+use iogame_common::networking::event::{NetworkingEvent, WsEvent};
 
 fn main() {
 
@@ -21,8 +22,10 @@ fn main() {
         println!("* {}", header);
     }
 
-    for _ in 0..10 {    
-        socket.send(Message::Text("Hello WebSocket".into())).unwrap();
-    }
+    socket.send(Message::Text(
+        serde_json::to_string::<WsEvent>(&WsEvent {
+            event: NetworkingEvent::ClientIdentifySelf,
+            payload: "aaaa".into(),
+        }).unwrap())).unwrap();
 
 }

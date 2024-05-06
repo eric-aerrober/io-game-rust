@@ -9,3 +9,4 @@ iogame_common = { path = "../common" }
 tungstenite = "0.21.0"
 tokio = { version = "1", features = ["full"] }
 url = "2.2.2"
+serde_json = "1.0"
