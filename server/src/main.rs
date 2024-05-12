@@ -2,7 +2,7 @@ mod connections;
 
 use warp::Filter;
 use iogame_common::utils::logger::{Logger, clear_screen};
-use connections::connection_handshaker::handle_incomming_websocket_connection;
+use connections::connection_handler::handle_incomming_websocket_connection;
 
 #[tokio::main]
 async fn main() {
@@ -16,7 +16,7 @@ async fn main() {
             ws.on_upgrade(handle_incomming_websocket_connection)
         });
 
-    logger.debug("Server started on ws://localhost:3030/websocket");
+    logger.info("Server started on ws://localhost:3030/websocket");
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 
 }

@@ -1,9 +1,11 @@
 use std::time::Instant;
 use colored::{Colorize, ColoredString};
+use once_cell::sync::OnceCell;
+
+#[derive(Debug)]
 pub struct Logger {
     scope: String,
-    level: i32,
-    start_time: Instant,
+    level: i32
 }
 
 #[derive(Clone, Copy)]
@@ -20,13 +22,15 @@ pub fn clear_screen(message: &str) {
     
 }
 
+static START_TIME: OnceCell<Instant> = OnceCell::new();
+
 impl Logger {
 
     pub fn new_leveled(scope: &str, level: i32) -> Logger {
+        START_TIME.get_or_init(|| Instant::now());
         Logger {
             scope: scope.to_string(),
-            level: level,
-            start_time: Instant::now(),
+            level: level
         }
     }
 
@@ -35,7 +39,7 @@ impl Logger {
     }
 
     fn elapsed_string(&self) -> String {
-        let elapsed = self.start_time.elapsed();
+        let elapsed = START_TIME.get().unwrap().elapsed();
         let hours = elapsed.as_secs() / 3600;
         let minutes = (elapsed.as_secs() % 3600) / 60;
         let seconds = elapsed.as_secs() % 60;

@@ -1,7 +1,13 @@
-use tungstenite::{connect, Message};
+use std::thread;
+use std::time::Duration;
+
+use iogame_common::networking::events::client_force_disconnected::ClientForceDisconnectedFromServer;
+use tungstenite::{connect};
+use tungstenite::protocol::Message::Binary;
 use url::Url;
 use iogame_common::utils::logger::{Logger, clear_screen};
-use iogame_common::networking::event::{NetworkingEvent, WsEvent};
+use iogame_common::networking::event::{NetworkingEvent, obj_from_msg};
+use iogame_common::networking::identity::{IdentitfierSource, Identity};
 
 fn main() {
 
@@ -11,21 +17,35 @@ fn main() {
     let (mut socket, response) =
         connect(Url::parse("ws://localhost:3030/websocket").unwrap()).expect("Can't connect");
 
-    logger.debug("Connected to the server");
-    logger.info("Connected to the server");
-    logger.warning("Connected to the server");
-    logger.error("Connected to the server");
+    std::thread::spawn(move || {
+        loop {
+            match socket.read() {
+                Ok(msg) => {
+                    match msg {
+                        Binary(data) => {
+                            let (event, obj) = obj_from_msg(data);
+                            logger.debug(&format!("Received Event: {:?}", event));
+                            match event {
+                                NetworkingEvent::ClientForceDisconnectedFromServer => {
+                                    let obj = bincode::deserialize::<ClientForceDisconnectedFromServer>(&obj).unwrap();
+                                    logger.error(&format!("Server forced disconnection: {}", obj.reason));
+                                },
+                                _ => {}
+                            }
+                        },
+                        _ => {
+                            logger.error("Received non-binary message");
+                        }
+                    }
+                },
+                Err(e) => {
+                    logger.error(&format!("Error: {:?}", e));
+                    break;
+                }
+            }
+        }
+    });
 
-    println!("Response HTTP code: {}", response.status());
-    println!("Response contains the following headers:");
-    for (ref header, _value) in response.headers() {
-        println!("* {}", header);
-    }
-
-    socket.send(Message::Text(
-        serde_json::to_string::<WsEvent>(&WsEvent {
-            event: NetworkingEvent::ClientIdentifySelf,
-            payload: "aaaa".into(),
-        }).unwrap())).unwrap();
+    thread::sleep(Duration::from_secs(5));
 
 }
